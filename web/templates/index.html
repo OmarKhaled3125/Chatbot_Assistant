@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot Assistant</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; }
+    #chatbox { width: 100%; max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    #messages { height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; background: #fafafa; }
+    .message { margin: 5px 0; }
+    .user { font-weight: bold; color: #333; }
+    .bot { color: #007acc; }
+    input { width: 80%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 10px 15px; border: none; background: #007acc; color: white; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #005f99; }
+  </style>
+</head>
+<body>
+  <div id="chatbox">
+    <h2>Chatbot Assistant</h2>
+    <div id="messages"></div>
+    <input type="text" id="userInput" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+  async function sendMessage() {
+    const input = document.getElementById("userInput");
+    const message = input.value.trim();
+    if (!message) return;
+
+    // Display user message
+    const messagesDiv = document.getElementById("messages");
+    messagesDiv.innerHTML += `<div class="message user">You: ${message}</div>`;
+
+    // Send to Flask backend
+    const response = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: message })
+    });
+
+    const data = await response.json();
+    const reply = data.reply;
+
+    // Display bot reply
+    messagesDiv.innerHTML += `<div class="message bot">Bot: ${reply}</div>`;
+    messagesDiv.scrollTop = messagesDiv.scrollHeight; // auto scroll
+
+    input.value = "";
+  }
+
+  // 👇 Add this block to allow Enter key to send message
+  document.getElementById("userInput").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault(); // prevent newline (if input were textarea)
+      sendMessage();
+    }
+  });
+</script>
+
+</body>
+</html>
